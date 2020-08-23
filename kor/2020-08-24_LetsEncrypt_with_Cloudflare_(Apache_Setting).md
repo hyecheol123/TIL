@@ -1,5 +1,5 @@
-# 2020-08-22 Let's Encrypt 와일드카드 TLS(SSL) 인증서 with Cloudflare + 아파치 설정
-최초 작성일: Aug. 23. 2020
+# 2020-08-24 Let's Encrypt 와일드카드 TLS(SSL) 인증서 with Cloudflare + 아파치 설정
+최초 작성일: Aug. 24. 2020
 
 
 #### Table of Contents
@@ -118,13 +118,62 @@ sudo a2enmod ssl
 아파치 사이트 설정파일 저장 폴더 `/etc/apache2/sites-available` 안에 HTTPS 기본 예제가 저장되어 있다.  
 이 파일을 복사 후 수정한다.
 ```
-
+cd /etc/apache2/sites-available
+sudo cp default-ssl.conf example.com_ssl.conf
+sudo vim example.com_ssl.conf
 ```
 
+- `ServerAdmin`에 서버 관리자 이메일 주소 넣기  
+- `ServerName`에 도메인 이름 추가
+- `SSLEngine`의 옵션이 `on`인 상태이고, 주석이 풀려있는지 확인  
+- `SSLCertificateFile`에 `/etc/letsencrypt/live/example.com/- fullchain.pem` 등록  
+- `SSLCertificateKeyFile`에 `/etc/letsencrypt/live/example.com/privkey.pem` 등록  
+
+아래는 수정 완료된 config 파일의 예시이다.
+`...`으로 표시된 부분은 생략된 부분을 나타낸다.
+```
+<IfModule mod_ssl.c>
+    <VirtualHost _default_:443>
+        ServerAdmin webmaster@example.com
+        ServerName example.com
+
+        DocumentRoot /var/www/html
+        ...
+
+        #   SSL Engine Switch:
+        #   Enable/Disable SSL for this virtual host.
+        SSLEngine on
+        ...
+
+        #   A self-signed (snakeoil) certificate can be created by installing
+        #   the ssl-cert package. See
+        #   /usr/share/doc/apache2/README.Debian.gz for more info.
+        #   If both key and certificate are stored in the same file, only the
+        #   SSLCertificateFile directive is needed.
+        SSLCertificateFile      /etc/letsencrypt/live/example.com/fullchain.pem
+        SSLCertificateKeyFile /etc/letsencrypt/live/example.com/privkey.pem
+        ...
+
+     </VirtualHost>
+</IfModule>
+```
+
+설정 파일을 다 작성하였으면, 사이트 설정 파일을 저장하고, 사이트를 활성화한다.
+```
+sudo a2ensite example.com_ssl.conf
+sudo service apache2 reload
+```
+
+브라우저에서 `https://example.com`으로 접속하여 정상적으로 HTTPS 연결이 이루어 지는지 확인한디.
+
+
 ### Conclusion
+지금까지 **무료**로 **신뢰할 수 있는 CA(인증기관)에서 발급한 SSL인증서**를 Let's Encrypt를 통해 발급받는 방법을 알아보았다.  
+단순히 HTTPS 연결을 지원함에서 끝날 것이 아니라, 추가로 HSTS 설정(항상 HTTPS로 연결되도록 설정) 및 TLS 버전의 세부 설정 (TLS 1 버전부터 TLS 1.3 버전까지 지원), 그리고 HTTP/2의 지원(속도 향상)을 통해 더 빠르고 안전한 웹사이트를 구축해나가자.
 
 
 #### Reference
 1. **It's time to turn on HTTPS: the benefits are well worth the effort**: https://www.cio.com/article/3180686/its-time-to-turn-on-https-the-benefits-are-well-worth-the-effort.html (English)
 2. **How to Get Let's Encrypt Wildcard Certificate with Cloudflare (Using Global API Key)**: https://blog.minase.moe/2 (Korean)
 3. **Official Manual of Using Certbot**: https://certbot-dns-cloudflare.readthedocs.io/en/stable/ (English)
+4. **Where are my certificates (Certbot Official User Guide)**: https://certbot.eff.org/docs/using.html#where-are-my-certificates (English)
