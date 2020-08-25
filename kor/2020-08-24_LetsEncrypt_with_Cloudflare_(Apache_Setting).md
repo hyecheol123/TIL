@@ -126,7 +126,7 @@ sudo vim example.com_ssl.conf
 - `ServerAdmin`에 서버 관리자 이메일 주소 넣기  
 - `ServerName`에 도메인 이름 추가
 - `SSLEngine`의 옵션이 `on`인 상태이고, 주석이 풀려있는지 확인  
-- `SSLCertificateFile`에 `/etc/letsencrypt/live/example.com/- fullchain.pem` 등록  
+- `SSLCertificateFile`에 `/etc/letsencrypt/live/example.com/fullchain.pem` 등록  
 - `SSLCertificateKeyFile`에 `/etc/letsencrypt/live/example.com/privkey.pem` 등록  
 
 아래는 수정 완료된 config 파일의 예시이다.
